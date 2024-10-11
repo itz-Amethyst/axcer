@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "axcer"
+version = "0.0.1"
+description = "another extraction and Contextual Evaluation Resource"
+authors = ["Milad-Khormaee <pransermi@gmail.com>"]
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file = "LICENSE" }
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.setuptools.packages.find]
+exclude = ["test*"]
