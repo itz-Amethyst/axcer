@@ -1,0 +1,35 @@
+name: "🐛 Bug Report"
+description: Create a bug/issue report
+title: "🐛 Bug: "
+labels: [bug]
+body:
+  - type: checkboxes
+    attributes:
+      label: Did you check existing issues?
+      description: Make sure you checked all of the below before submitting an issue to avoid duplicates
+      options:
+        - label: I have searched the existing issues of the repo
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description of the bug"
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: "Screenshots"
+      description: If needed, add screenshots to help explain your problem.
+    validations:
+      required: false
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environment"
+      description: Please add any relevant information about your environment.
+      value: |
+        Linux Distro, Linux Version, Hyprland Version...
+    validations:
+      required: true

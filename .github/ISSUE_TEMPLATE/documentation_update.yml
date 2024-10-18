@@ -1,0 +1,36 @@
+name: "📚 Documentation Update"
+description: Suggest a new change in the repo documentation
+title: "📚 Docs: "
+labels: [documentation]
+body:
+  - type: checkboxes
+    attributes:
+      label: Did you check existing doc request?
+      description: Make sure you checked all of the below before submitting a request to avoid duplicates
+      options:
+        - label: I have searched the existing requests of the repo
+          required: true
+  - type: textarea
+    attributes:
+      label: Description of the request
+      description: A clear description of the documentation update.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Current Documentation
+      description: Provide a link to the current documentation or describe where it can be found.
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Proposed Documentation
+      description: Provide a clear description of the updated documentation.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Add any other information about the documentation update here. For example, you might include links to similar documentation in other projects, or screenshots or diagrams to help explain your idea.
+    validations:
+      required: false
