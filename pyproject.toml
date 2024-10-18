@@ -46,6 +46,8 @@ setuptools = "^75.2.0"
 # [build-system]
 # requires = ["poetry-core"]
 # build-backend = "poetry.core.masonry.api"
+pytest-cov = "^5.0.0"
+coverage = "^7.6.3"
 
 [tool.setuptools.packages.find]
 exclude = ["test*"]
@@ -168,6 +170,12 @@ convention = "google"
 [tool.ruff.per-file-ignores]
 "mkdocs_macros.py" = ["ALL"] # always
 
+[tool.semantic_release]
+version_variable = "axcer/__init__.py" # Path to the version variable in your code
+version = "0.0.1"                      # Starting version
+disable_commit_message_check = false   # Ensure that commit messages follow semantic versioning
+changelog_file = "CHANGELOG.md"        # Path to the changelog file
+
 [tool.semantic_release.commit_parser_options]
 allowed_tags = [
   "build",
@@ -179,6 +187,7 @@ allowed_tags = [
   "refactor",
   "ci",
   "test",
+  "config"
 ]
 minor_tags = ["feat"]
 patch_tags = ["fix", "perf"]
