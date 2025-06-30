@@ -56,3 +56,6 @@ coverage.xml
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# Uses dynamic build versioning
+axcer/_version.py
