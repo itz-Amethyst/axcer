@@ -1,8 +1,8 @@
 import polars as pl
-from apply_filter import process_and_save
-from dataset_config import DATASET_NAMES
+from experiments.apply_filter import process_and_save
+from experiments.dataset_config import DATASET_NAMES
 from datasets import load_dataset
-from axcer.experiments.utils.parse_dataset import parse_dataset_entry
+from experiments.utils.parse_dataset import parse_dataset_entry
 from axcer.utils.custom_logger import logger
 
 

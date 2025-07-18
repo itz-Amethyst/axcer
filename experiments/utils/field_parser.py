@@ -47,7 +47,12 @@ class FieldPathParser:
 
             elif index is not None:
                 try:
-                    current[int(index) if index.isdigit() else current[index]]
+                    if index.isdigit():
+                        i = int(index)
+                        current = {key: current[key][i] for key in current}
+                    else:
+                        current = current[index]
+                    # current[int(index) if index.isdigit() else current[index]]
                 except (KeyError, IndexError, TypeError):
                     return None
 
@@ -64,7 +69,8 @@ class FieldPathParser:
         try:
             if "." not in field_path and "[" not in field_path:
                 if field_path in df.columns:
-                    return df[field_path]
+                    series = df[field_path]
+                    return pl.Series(series.name, series.to_list())
                 else:
                     return pl.Series(field_path, [""] * len(df))
 
