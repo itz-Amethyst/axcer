@@ -41,7 +41,7 @@ class DatasetProcessor:
                 series = self.field_parser.extract_value_vectorized(df, field)
                 field_series_list.append(series)
 
-            def combine_fields(*field_values):
+            def combine_fields(*field_values):  # noqa: PLR0912
                 combined_parts = []
                 formatted_options = []
                 for i, field_value in enumerate(field_values):
@@ -62,7 +62,7 @@ class DatasetProcessor:
                     elif dataset_name == "mbpp":
                         combined_parts.append(f"Prompt: {str(field_value)}")
                         continue
-                    elif field_value:
+                    elif dataset_name == "piqa":
                         if i == 0:
                             formatted_options.append(f"{field_value}")
                             continue
@@ -73,6 +73,8 @@ class DatasetProcessor:
                             formatted_options.append(f"{chr(65 + i - 1)}. {field_value}")
                             combined_parts.append(", ".join(str(item) for item in formatted_options))
                             formatted_options.clear()
+                    else:
+                        combined_parts.append(str(field_value))
 
                 return " ".join(combined_parts) if combined_parts else ""
 
@@ -92,8 +94,13 @@ class DatasetProcessor:
 
             if isinstance(value, list):
                 if len(value) > 0 and isinstance(value[0], str):
-                    formatted_options = ", ".join(f"{item}" for _, item in enumerate(value))
-                    return f"{formatted_options}"
+                    if dataset_name == "mbpp":
+                        # to separate items by ; later while we are evaluating (, is a python keyword and used in the examples it's hard to separate by it)
+                        formatted_options = "; ".join(f"{item}" for _, item in enumerate(value))
+                        return f"{formatted_options}"
+                    else:
+                        formatted_options = ", ".join(f"{item}" for _, item in enumerate(value))
+                        return f"{formatted_options}"
                 else:
                     return ", ".join(str(item) for item in value)
             else:
