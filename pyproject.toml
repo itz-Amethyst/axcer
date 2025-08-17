@@ -24,7 +24,10 @@ classifiers = [
 # fill this later
 keywords = ["nlp"]
 dependencies = [
+    "nltk>=3.9.1",
+    "polars>=1.31.0",
     "rustworkx>=0.16.0",
+    "tiktoken>=0.9.0",
 ]
 
 [tool.hatch.version]
@@ -88,7 +91,8 @@ indent-width = 4
 
 # The minimum Python version to target, e.g., when considering automatic code upgrades,
 # like rewriting type annotations
-target-version = "py38"
+# TODO: ????
+# target-version = "py39"
 
 [tool.ruff.lint]
 # Defined rules
@@ -111,12 +115,16 @@ select = [
   "PLC", # Performance: Performance issues related to class methods
   "PLE", # Performance: Performance issues related to loops
   # "PLR", # Performance: Performance issues related to recursion
-  "PLW", # Performance: Performance issues related to while loops
+  # "PLW", # Performance: Performance issues related to while loops
   # "TRY", # Try/Except: Best practices for using try/except blocks
 ]
 ignore = [
   "RUF001", # String contains ambiguous unicode character
   "PLR2004",
+  "ARG001",
+  "PLR0912",
+  "PLR0913",
+  "PLW2901",
   "RUF002", # Docstring contains ambiguous unicode character
   "RUF003", # Comment contains ambiguous unicode character
   "TRY002", # Create your own exception
@@ -181,7 +189,12 @@ patch_tags = ["fix", "perf"]
 
 [dependency-groups]
 dev = [
+    "bert-score>=0.3.13",
     "coverage>=7.8.0",
+    "datasets>=3.6.0",
+    "hatchling>=1.27.0",
+    "matplotlib>=3.10.3",
+    "modal>=1.0.5",
     "polars>=1.31.0",
     "pyinstrument>=5.0.1",
     "pytest>=8.3.5",
