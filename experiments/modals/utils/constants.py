@@ -1,46 +1,64 @@
-import argparse
+from dataclasses import dataclass
 from pathlib import Path
+import modal
+
+config = modal.Dict.from_name("eval-config", create_if_missing=True)
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Run the evaluation with given model settings")
-    parser.add_argument(
-        "--model_id", type=str, required=True, help="Model idendtifier(ID)", default="meta-llama/Meta-Llama-3.1-8B"
-    )
-    parser.add_argument(
-        "--model_revision", type=str, required=True, help="Model revisions to prevent unexpected changes!", default=""
-    )
-    # this will be passed to concurrent decorator
-    parser.add_argument(
-        "--model_instance", type=int, required=True, help="To have multiple model instance to get faster response on datasets"
-    )
-    return parser.parse_args()
+def snapshot_config() -> dict:
+    cls = EvaluateConfig
+    return {key: getattr(cls, key) for key in dir(cls) if key.isupper() and not callable(getattr(cls, key))}
 
 
-args = parse_args()
+@dataclass
+class EvaluateConfig:
+    # Initial default values
+    MODEL_ID: str = ""
+    MODEL_REVISION: str = ""
+    MAX_CONCURRENT_INPUTS: int = 1
 
-MODEL_REVISION = args.model_revision
-MODEL_ID = args.model_id
+    # Static values
+    STATIC_VOLUME: str = "/vol/model"
+    VOLUME_PATH: str = "/vol"
+    DATA_DIR: Path = Path("/experiments/datasets")
+    INPUT_COLUMN: str = "input_column"
+    # PARQUET_PATHS: List[Path] = list(DATA_DIR.glob("*.parquet"))
 
-MODEL_NAME = MODEL_ID.split("/")[-1]
-# MODEL_REVISION = ""
-STATIC_VOLUME = "/vol/model"
-MODEL_DIR = STATIC_VOLUME + f"/{MODEL_NAME}"
-MODEL_DIRFP16 = STATIC_VOLUME + f"/{MODEL_NAME}_FP16"
-# MODEL_DIRFP16_CHK = "/vol/model" + f"/{MODEL_NAME}_FP16/checkpoints"
-ENGINE_PATH = MODEL_DIRFP16 + "/engine"
-VOLUME_PATH = "/vol"
-# CHECKPOINT_DIR = (f"{ENGINE_PATH}/checkpoint",)
-# MODEL_REVISION = "d04e592bb4f6aa9cfee91e2e20afa771667e1d4b"
-# GIT_HASH = "1389f5a4d38cfefdc6944c1a9aa857fec6f72592"
-# CONVERSION_SCRIPT_URL = f"https://raw.githubusercontent.com/NVIDIA/TensorRT-LLM/{GIT_HASH}/examples/quantization/quantize.py"
+    BERT_MODEL_ID: str = ""
+    BERT_MODEL_NAME: str = ""
 
-N_GPUS = 1
-GPU_CONFIG = f"B200:{N_GPUS}"
-# DTYPE = "float16"
-# QUANTIZATION_ARGS = f"--dtype={DTYPE}"
+    # Token & batch config
+    MAX_BATCH_SIZE: int = 5
+    MAX_INPUT_LEN: int = 8192
+    MAX_OUTPUT_LEN: int = 512  # 1024
+    TOTAL_CPU_CORES: int = 2
+    MAX_SEQ_LEN: int = MAX_INPUT_LEN
+    MAX_NUM_TOKENS: int = MAX_BATCH_SIZE * MAX_INPUT_LEN
+    # OPT_BATCH_SIZE: int = MAX_BATCH_SIZE
 
-DATA_DIR = Path("/experiments/datasets")
-INPUT_COLUMN = "input_column"
+    N_GPUS: int = 1
+    GPU_CONFIG: str = f"H200:{N_GPUS}"
 
-parquet_paths = list(DATA_DIR.glob("*.parquet"))
+    MINUTE: int = 60
+    # NVIDIA's Ada Lovelace/Hopper chips, like the 4090, L40S, and H100,
+
+    @property
+    def PARQUET_PATHS(self) -> list[Path]:
+        return list(self.DATA_DIR.glob("*.parquet"))
+
+    @classmethod
+    def set_essential_parameters(cls, model_id: str, model_revision: str, max_batch_size: int) -> None:
+        cls.MODEL_ID = model_id
+        cls.MODEL_REVISION = model_revision
+        cls.MAX_CONCURRENT_INPUTS = max_batch_size
+
+        cls.MODEL_NAME = model_id.split("/")[-1]
+        cls.MODEL_DIR = f"{cls.STATIC_VOLUME}/{cls.MODEL_NAME}"
+        # cls.ENGINE_PATH = f"{cls.MODEL_DIR}/engine"
+
+        cls.BERT_MODEL_NAME = cls.BERT_MODEL_ID.split("/")[-1]
+
+        # Update batch sizes too
+        cls.MAX_BATCH_SIZE = max_batch_size
+        cls.MAX_NUM_TOKENS = cls.MAX_BATCH_SIZE * cls.MAX_INPUT_LEN
+        cls.OPT_BATCH_SIZE = cls.MAX_BATCH_SIZE

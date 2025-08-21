@@ -6,6 +6,7 @@ from experiments.dataset_config import DATASETS as datasets
 from experiments.utils.field_parser import FieldPathParser
 from experiments.utils.prepare_dataset import preprocess_dataset
 from experiments.utils.format_mawps import process_mawps
+from experiments.constants.paths import DATASET_PATH
 
 field_parser = FieldPathParser()
 
@@ -13,7 +14,7 @@ field_parser = FieldPathParser()
 def process_and_save(df: pl.DataFrame, dataset_name: str, output_dir: str = "datasets"):
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     dataset_name = dataset_name.split("/")[-1] if "/" in dataset_name else dataset_name
-    output_path = Path(output_dir) / f"processed_{dataset_name}.parquet"
+    output_path = DATASET_PATH / "temp" / f"processed_{dataset_name}.parquet"
 
     try:
         if dataset_name in datasets:
@@ -38,5 +39,5 @@ def process_and_save(df: pl.DataFrame, dataset_name: str, output_dir: str = "dat
         logger.error(f"Error processing dataset '{dataset_name}': {e}")
         print(f"Failed to process dataset '{dataset_name}': {e}")
 
-    df.write_parquet(output_path)
+    df.head(5).write_parquet(output_path)
     logger.info(f"Saved: {output_path}")
