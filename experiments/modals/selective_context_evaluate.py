@@ -35,9 +35,6 @@ selective_image = selective_image.pip_install(
     # "spacy",
     "thinc",
     "huggingface_hub[hf_transfer]==0.34.1",
-    "evaluate==0.4.5",
-    "bert-score==0.3.13",
-    "rouge-score==0.1.2",
     "setuptools",
     "wheel",
     extra_index_url="https://download.pytorch.org/whl/cu128",
@@ -49,6 +46,7 @@ selective_image = selective_image.uv_pip_install(
     # "flashinfer-python==0.2.6.",
     "polars==1.31.0",
     "transformers==4.54.0",
+    "evaluate==0.4.5",
     "selective-context",
     "tiktoken==0.11.0",
     "spacy==3.8.7",
@@ -127,16 +125,18 @@ class SelectiveEvaluate:
 
             compression_ratio = None
             if prompt_tokens > 0:
-                compression_ratio = compressed_tokens / prompt_tokens
+                compression_ratio = prompt_tokens / compressed_tokens
 
+            gpt_o1_saving = (prompt_tokens - compressed_tokens) * 0.015 / 1000
             results.append(
                 {
                     "prompt": prompt,
                     "prompt_tokens": prompt_tokens,
-                    "total_runtime": round(total_runtime, 6),
+                    "compression_time": float(f"{total_runtime:.3f}"),
                     "compressed_tokens": compressed_tokens,
                     "compression_ratio": compression_ratio,
                     "compressed_text": compressed_text,
+                    "gpt_o1_saving": f"{gpt_o1_saving:.1f}",
                 }
             )
 
