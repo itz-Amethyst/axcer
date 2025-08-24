@@ -17,17 +17,19 @@ def concat_two_metrics(
     df1_path: Path,
     df2_path: Path,
     columns1: list[str] | None = None,
-    columns2: list[str] | None = None,
 ):
     df1 = pl.read_csv(df1_path)
     df2 = pl.read_csv(df2_path)
 
     if columns1 is not None:
         df1 = df1.select(columns1)
-    if columns2 is not None:
-        df2 = df2.select(columns2)
+
+    df2 = df2.select(pl.all())
 
     df2 = pl.concat([df2, df1], how="horizontal")
+
+    if "compression_time" in df1.columns and "generation_time" in df2.columns:
+        df2 = df2.with_columns((pl.col("compression_time") + pl.col("generation_time")).alias("end_to_end_time"))
 
     df2.write_csv(df2_path)
     print(f"Saved concatenated DataFrame to: {df2_path}")

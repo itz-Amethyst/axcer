@@ -12,7 +12,7 @@ class DatasetProcessor:
     def __init__(self):
         self.field_parser = FieldPathParser()
 
-    def process_question_field_vectorized(
+    def process_question_field_vectorized(  # noqa: PLR0915
         self, df: pl.DataFrame, question_fields: list, dataset_name: str | None = None
     ) -> pl.Series:
         """
@@ -44,6 +44,7 @@ class DatasetProcessor:
             def combine_fields(*field_values):  # noqa: PLR0912
                 combined_parts = []
                 formatted_options = []
+                counter = 0
                 for i, field_value in enumerate(field_values):
                     if isinstance(field_value, list):
                         if field_value and isinstance(field_value[0], str):
@@ -62,6 +63,14 @@ class DatasetProcessor:
                     elif dataset_name == "mbpp":
                         combined_parts.append(f"Prompt: {str(field_value)}")
                         continue
+                    elif dataset_name == "multi_nli":
+                        if counter == 0:
+                            combined_parts.append(f"Premise: {str(field_value)}")
+                            counter += 1
+                            continue
+                        elif counter == 1:
+                            combined_parts.append(f"Hypothesis: {str(field_value)}")
+                            continue
                     elif dataset_name == "piqa":
                         if i == 0:
                             formatted_options.append(f"{field_value}")
@@ -76,6 +85,7 @@ class DatasetProcessor:
                     else:
                         combined_parts.append(str(field_value))
 
+                counter = 0
                 return " ".join(combined_parts) if combined_parts else ""
 
             temp_df = pl.DataFrame({f"field_{i}": series for i, series in enumerate(field_series_list)})
@@ -106,6 +116,8 @@ class DatasetProcessor:
             else:
                 if dataset_name == "piqa":
                     return "A" if value == 0 else "B"
+                elif dataset_name == "gsm8k":
+                    return value.split("####")[-1]
 
                 return str(value) if value is not None else ""
 
