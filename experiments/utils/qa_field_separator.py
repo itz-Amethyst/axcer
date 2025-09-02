@@ -69,11 +69,10 @@ def separate_qa_fields(df: pl.DataFrame, config: dict[str, Any]) -> pl.DataFrame
     )
 
     context_field = config["context_field"][0]
+    print("CONTEXT FIELD IS", context_field)
     result = result.with_columns(
         [
-            (pl.col(context_field).str.replace("CANNOTANSWER", "").cast(pl.Utf8) + pl.lit("\n") + pl.col("question")).alias(
-                "input_field"
-            ),
+            (pl.col(context_field) + pl.lit("\n") + pl.col("question")).alias("input_field"),
             pl.col("answer").alias("answer_field"),
         ]
     )

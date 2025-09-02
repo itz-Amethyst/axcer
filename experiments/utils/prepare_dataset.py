@@ -20,10 +20,15 @@ class DatasetProcessor:
         """
         if len(question_fields) == 1:
             field_series = self.field_parser.extract_value_vectorized(df, question_fields[0])
+            if dataset_name == "scitldr":
+                field_series = field_series.list.join(" ")
 
             def format_single_field(value):
                 if isinstance(value, list):
-                    if value and isinstance(value[0], str):
+                    if dataset_name == "scitldr":
+                        return " ".join(str(item) for item in value)
+
+                    elif value and isinstance(value[0], str):
                         formatted_options = ", ".join(f"{item}" for _, item in enumerate(value))
                         return f"Options: {formatted_options}"
                     else:
@@ -63,13 +68,13 @@ class DatasetProcessor:
                     elif dataset_name == "mbpp":
                         combined_parts.append(f"Prompt: {str(field_value)}")
                         continue
-                    elif dataset_name == "multi_nli":
+                    elif dataset_name == "glue":
                         if counter == 0:
-                            combined_parts.append(f"Premise: {str(field_value)}")
+                            combined_parts.append(f"Text1: {str(field_value)}")
                             counter += 1
                             continue
                         elif counter == 1:
-                            combined_parts.append(f"Hypothesis: {str(field_value)}")
+                            combined_parts.append(f"Text2: {str(field_value)}")
                             continue
                     elif dataset_name == "piqa":
                         if i == 0:
@@ -136,14 +141,18 @@ class DatasetProcessor:
             pl.DataFrame: Processed DataFrame with 'question' and 'answer' columns
         """
         question_fields = config["question_field"]
-        answer_field = config["answer_field"]
+        answer_field = config.get("answer_field")
 
         try:
             question_series = self.process_question_field_vectorized(df, question_fields, dataset_name)
-            answer_series = self.process_answer_field_vectorized(df, answer_field, dataset_name)
+            # for scitldr
+            if answer_field:
+                answer_series = self.process_answer_field_vectorized(df, answer_field, dataset_name)
 
             df = df.with_columns(question_series.alias("input_field"))
-            df = df.with_columns(answer_series.alias("answer_field"))
+            # for scitldr
+            if answer_field:
+                df = df.with_columns(answer_series.alias("answer_field"))
 
             # # Filter out rows where both question and answer are empty
             # processed_df = processed_df.filter(
