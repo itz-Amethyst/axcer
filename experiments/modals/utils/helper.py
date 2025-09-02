@@ -1,8 +1,15 @@
 from pathlib import Path
 import os
 import subprocess
+from collections.abc import Iterator
 
 from experiments.constants.paths import DATASET_VOLUME_MOUNT_POINT, VOLUME_MOUNT_POINT
+from experiments.modals.utils.constants import EvaluateConfig
+
+
+def snapshot_config() -> dict:
+    cls = EvaluateConfig
+    return {key: getattr(cls, key) for key in dir(cls) if key.isupper() and not callable(getattr(cls, key))}
 
 
 def map_path_to_volume(target: Path, mount_point: Path = VOLUME_MOUNT_POINT) -> Path:
@@ -23,6 +30,14 @@ def map_path_to_volume(target: Path, mount_point: Path = VOLUME_MOUNT_POINT) -> 
             rest = parts[i + 2 :]  # everything after 'results'
             return mount_point.joinpath(*rest)
     return target
+
+
+def pair_files(path1: Path, path2: Path) -> Iterator[tuple[Path, Path]]:
+    files1 = {f.stem.removeprefix("processed_"): f for f in path1.glob("*.csv")}
+    files2 = {f.stem: f for f in path2.glob("*.csv")}
+
+    for dataset_name in files1.keys() & files2.keys():
+        yield files1[dataset_name], files2[dataset_name]
 
 
 def map_dataset_path_to_volume(target: Path, mount_point: Path = DATASET_VOLUME_MOUNT_POINT) -> Path:
