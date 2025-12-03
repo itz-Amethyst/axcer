@@ -113,6 +113,7 @@ select = [
   "YTT", # Type annotations: Issues with type annotations in functions and variables
   "PGH", # Performance: Performance issues related to function calls
   "PL",  # Performance: General performance issues
+  "PLR",
   "PLC", # Performance: Performance issues related to class methods
   "PLE", # Performance: Performance issues related to loops
   # "PLR", # Performance: Performance issues related to recursion
@@ -125,6 +126,7 @@ ignore = [
   "ARG001",
   "PLR0912",
   "PLR0913",
+  "PLR0915",
   "PLW2901",
   "RUF002", # Docstring contains ambiguous unicode character
   "RUF003", # Comment contains ambiguous unicode character
