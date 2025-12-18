@@ -10,12 +10,17 @@ def load_datasets(dataset_dir: Path, question_col: str, answer_col: str):
         print("Directory not found:", dataset_dir)
         return datasets
 
-    # There is only one instance of dataset in given path, we loop through it
     files = list(dataset_dir.glob("*.parquet")) + list(dataset_dir.glob("*.csv"))
+
     for dataset_file in files:
-        print("yes")
-        df = pl.read_parquet(dataset_file, columns=[question_col, answer_col])
-        dataset_name = dataset_file.stem  # name without .parquet
-        datasets[dataset_name] = df[[question_col, answer_col]]
-    print()
+        if dataset_file.suffix == ".parquet":
+            df = pl.read_parquet(dataset_file, columns=[question_col, answer_col])
+        elif dataset_file.suffix == ".csv":
+            df = pl.read_csv(dataset_file, columns=[question_col, answer_col])
+        else:
+            continue
+
+        dataset_name = dataset_file.stem
+        datasets[dataset_name] = df.select([question_col, answer_col])
+
     return datasets
