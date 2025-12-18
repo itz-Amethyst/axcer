@@ -11,6 +11,6 @@ def get_vllm_config() -> dict:
         "max_num_seqs": config["MAX_BATCH_SIZE"],
         "trust_remote_code": True,
         "max_num_batched_tokens": config["MAX_NUM_TOKENS"],
-        "gpu_memory_utilization": 0.95,
+        "gpu_memory_utilization": 0.90,
         "enable_chunked_prefill": True,
     }

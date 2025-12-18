@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+
 import modal
 
 config = modal.Dict.from_name("eval-config", create_if_missing=True)
@@ -28,10 +29,11 @@ class EvaluateConfig:
     BERT_MODEL_NAME: str = ""
 
     # Token & batch config
-    MAX_BATCH_SIZE: int = 5
+    MAX_BATCH_SIZE: int = 1  # 5
     MAX_INPUT_LEN: int = 8192
-    MAX_OUTPUT_LEN: int = 512  # 1024
-    TOTAL_CPU_CORES: int = 2
+    MAX_OUTPUT_LEN: int = 1024  # 512  # 1024
+    # TOTAL_CPU_CORES: int = 2
+    TOTAL_CPU_CORES: float = 1.5
     MAX_SEQ_LEN: int = MAX_INPUT_LEN
     MAX_NUM_TOKENS: int = MAX_BATCH_SIZE * MAX_INPUT_LEN
     # OPT_BATCH_SIZE: int = MAX_BATCH_SIZE
@@ -40,7 +42,6 @@ class EvaluateConfig:
     GPU_CONFIG: str = f"H200:{N_GPUS}"
 
     MINUTE: int = 60
-    # NVIDIA's Ada Lovelace/Hopper chips, like the 4090, L40S, and H100,
 
     @property
     def PARQUET_PATHS(self) -> list[Path]:
@@ -54,11 +55,9 @@ class EvaluateConfig:
 
         cls.MODEL_NAME = model_id.split("/")[-1]
         cls.MODEL_DIR = f"{cls.STATIC_VOLUME}/{cls.MODEL_NAME}"
-        # cls.ENGINE_PATH = f"{cls.MODEL_DIR}/engine"
 
         cls.BERT_MODEL_NAME = cls.BERT_MODEL_ID.split("/")[-1]
 
         # Update batch sizes too
         cls.MAX_BATCH_SIZE = max_batch_size
         cls.MAX_NUM_TOKENS = cls.MAX_BATCH_SIZE * cls.MAX_INPUT_LEN
-        cls.OPT_BATCH_SIZE = cls.MAX_BATCH_SIZE
