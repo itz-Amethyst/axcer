@@ -1,8 +1,6 @@
-import gc
+import asyncio
 from pathlib import Path
 from typing import Any
-import asyncio
-from experiments.modals.utils.prepare_datasets import load_datasets
 
 import modal
 
@@ -17,8 +15,10 @@ from experiments.constants.paths import (
 from experiments.evaluation.utils.align_datasets import replace_input_column_values
 from experiments.modals.utils.constants import EvaluateConfig
 from experiments.modals.utils.helper import map_path_to_volume
-from experiments.modals.utils.metrics import save_metrics_to_csv
-from experiments.modals.utils.selective.metric_helper import prepare_tokenizer_for_counting_modal
+from experiments.modals.utils.metric_helper import prepare_tokenizer_for_counting_modal
+from experiments.modals.utils.metrics import compute_fixed_range_compression_ratio, save_metrics_to_csv
+from experiments.modals.utils.prepare_datasets import load_datasets
+from experiments.modals.utils.selective.selective_helper import attach_segmentation_wrapper_to_sc
 
 hf_secret = modal.Secret.from_name("huggingface-secret")
 app = modal.App("axcer_evaluate_selective", secrets=[hf_secret])
@@ -30,9 +30,6 @@ selective_image = (
 )
 
 selective_image = selective_image.pip_install(
-    # "selective-context",
-    # "tiktoken==0.11.0",
-    # "spacy",
     "thinc",
     "huggingface_hub[hf_transfer]==0.34.1",
     "setuptools",
@@ -42,8 +39,6 @@ selective_image = selective_image.pip_install(
 
 
 selective_image = selective_image.uv_pip_install(
-    # "huggingface_hub[hf_transfer]==0.34.1",
-    # "flashinfer-python==0.2.6.",
     "polars==1.31.0",
     "transformers==4.54.0",
     "evaluate==0.4.5",
@@ -65,13 +60,10 @@ results_vol = modal.Volume.from_name(VOLUME_NAME, create_if_missing=True)
 with selective_image.imports():
     import time
 
-    import torch
     from selective_context import SelectiveContext
 
 
 @app.cls(
-    # gpu="H200",
-    # gpu="A100-40GB",
     gpu="A100-80GB",
     image=selective_image,
     volumes={
@@ -84,9 +76,9 @@ with selective_image.imports():
     max_containers=1,
     memory=4096,  # 4GB
     secrets=[hf_secret],
-    timeout=300 * 60,
+    timeout=24 * 60 * 60,  # 24 hours
 )
-@modal.concurrent(max_inputs=9)
+@modal.concurrent(max_inputs=1)
 class SelectiveEvaluate:
     @modal.enter()
     def setup(
@@ -96,30 +88,31 @@ class SelectiveEvaluate:
 
         self.llm = SelectiveContext(model_type="gpt2", lang="en")
 
+        # To handle prompts larger than 1024 tokens (doing wised chunking with %5 overlap tokens)
+        attach_segmentation_wrapper_to_sc(self.llm, overlap_tokens=None)
         print("loading tokenizer for counting tokens")
         self.tokenizer = prepare_tokenizer_for_counting_modal()
 
-    @modal.batched(max_batch_size=EvaluateConfig.MAX_BATCH_SIZE, wait_ms=500)
+    @modal.batched(max_batch_size=80, wait_ms=500)
     async def compress_and_save(self, prompts: list[str]):
-        unpacked = [prompt.split(" | ") for prompt in prompts]
+        unpacked = [prompt.split(" |||| ") for prompt in prompts]
 
         dataset_names = [parts[0] for parts in unpacked]
         inputs = [parts[1].removeprefix("I: ").strip() for parts in unpacked]
 
         results: list[dict[str, Any]] = []
         for prompt in inputs:
-            print("Prompt is", prompt)
             prompt_tokens = len(self.tokenizer.encode(prompt))
+            print("TOTAL NUMBER OF TOKENS", prompt_tokens)
 
             start = time.perf_counter()
+            print("PROMPT IS", prompt)
 
-            compressed_text = self.llm(prompt)
-            compressed_text = str(compressed_text[0])
-            print("Compressed prompt is: ", compressed_text)
-
+            compressed_text, _ = self.llm(prompt, reduce_ratio=0.5)
             end = time.perf_counter()
 
             total_runtime = end - start
+            compressed_text = str(compressed_text)
 
             compressed_tokens = len(self.tokenizer.encode(compressed_text))
 
@@ -132,19 +125,15 @@ class SelectiveEvaluate:
                 {
                     "prompt": prompt,
                     "prompt_tokens": prompt_tokens,
-                    "compression_time": float(f"{total_runtime:.3f}"),
+                    "compression_time": f"{total_runtime:.3f}",
                     "compressed_tokens": compressed_tokens,
                     "compression_ratio": compression_ratio,
                     "compressed_text": compressed_text,
-                    "gpt_o1_saving": f"{gpt_o1_saving:.1f}",
+                    "gpt_o1_saving": f"{gpt_o1_saving:.2f}",
                 }
             )
 
         save_metrics_to_csv(results, dataset_names, PROCESSED_SELECTIVE_PATH, model_name=None)
-
-        del dataset_names, inputs, unpacked
-        gc.collect()
-        torch.cuda.empty_cache()
 
         return results
 
@@ -155,7 +144,11 @@ class SelectiveEvaluate:
         print("Started to replace compressed values with dataset values")
         processed_paths = map_path_to_volume(PROCESSED_SELECTIVE_PATH.parent)
         for processed_path in processed_paths.glob("*.csv"):
-            print("BASE IS", processed_path)
+            print("Processed_path is ", processed_path)
+            processed_df = compute_fixed_range_compression_ratio(processed_path)
+            processed_df.write_csv(processed_path)
+            vol = modal.Volume.from_name(VOLUME_NAME)
+            vol.commit()
             base_name = str(processed_path.stem.removeprefix("processed_"))
             # base_name = base_name.split(".")[0]
             try:
@@ -168,16 +161,16 @@ class SelectiveEvaluate:
 
 @app.local_entrypoint()
 async def main():
-    datasets = load_datasets(DATASET_PATH / "temp", question_col="input_field", answer_col="answer_field")
+    datasets = load_datasets(DATASET_PATH, question_col="input_field", answer_col="answer_field")
     selective_e = SelectiveEvaluate()
 
     async def process_dataset_selective(dataset_name, df, question_col):
         prompts = df[question_col].to_list()
-        prompts = [f"{dataset_name} | I: {q}" for q in prompts]
+        prompts = [f"{dataset_name} |||| I: {q}" for q in prompts]
         print(f"[{dataset_name}] submitting {len(prompts)} prompts...")
         output_path = Path(f"{dataset_name}_results.json")
-        async for batch in selective_e.compress_and_save.map.aio(prompts):
-            print("Processed :", len(batch))
+        async for _batch in selective_e.compress_and_save.map.aio(prompts):
+            pass
 
         print(f"[{dataset_name}] done — wrote to {output_path}")
 
