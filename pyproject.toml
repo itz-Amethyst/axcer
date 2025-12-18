@@ -124,6 +124,8 @@ ignore = [
   "RUF001", # String contains ambiguous unicode character
   "PLR2004",
   "ARG001",
+  "PLC0415",
+  "PGH003",
   "PLR0912",
   "SIM102",
   "PLR0913",
