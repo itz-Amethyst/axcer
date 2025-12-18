@@ -24,7 +24,7 @@ classifiers = [
 # fill this later
 keywords = ["nlp"]
 dependencies = [
-    "modal-or-local>=0.1.1",
+    "joblib>=1.5.1",
     "nltk>=3.9.1",
     "polars>=1.31.0",
     "rustworkx>=0.16.0",
@@ -125,6 +125,7 @@ ignore = [
   "PLR2004",
   "ARG001",
   "PLR0912",
+  "SIM102",
   "PLR0913",
   "PLR0915",
   "PLW2901",
