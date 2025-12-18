@@ -2,6 +2,7 @@ modal volume create dataset-volume
 
 # python download_datasets.py
 DEFAULT_PATH="/home/itz-amethyst/dev/axcer/experiments/datasets"
+python download_datasets.py
 
 # If provided, use the first argument as the upload path; otherwise, fall back to the default.
 if [ -n "$1" ]; then

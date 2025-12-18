@@ -14,7 +14,7 @@ field_parser = FieldPathParser()
 def process_and_save(df: pl.DataFrame, dataset_name: str, output_dir: str = "datasets"):
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     dataset_name = dataset_name.split("/")[-1] if "/" in dataset_name else dataset_name
-    output_path = DATASET_PATH / "temp" / f"processed_{dataset_name}.parquet"
+    output_path = DATASET_PATH / f"processed_{dataset_name}.parquet"
 
     try:
         if dataset_name in datasets:
@@ -22,8 +22,8 @@ def process_and_save(df: pl.DataFrame, dataset_name: str, output_dir: str = "dat
             print(f"Processing with config: {config}")
             print("cleaned", dataset_name)
 
-            if dataset_name.lower() in ["coqa", "quac"]:
-                # to explecity handle these datasets
+            if dataset_name.lower() in ["coqa"]:
+                # to explicitly handle dataset
                 df = separate_qa_fields(df, config)
 
             elif dataset_name.lower() in "mawps":
@@ -39,5 +39,5 @@ def process_and_save(df: pl.DataFrame, dataset_name: str, output_dir: str = "dat
         logger.error(f"Error processing dataset '{dataset_name}': {e}")
         print(f"Failed to process dataset '{dataset_name}': {e}")
 
-    df.head(5).write_parquet(output_path)
+    df.write_parquet(output_path)
     logger.info(f"Saved: {output_path}")
