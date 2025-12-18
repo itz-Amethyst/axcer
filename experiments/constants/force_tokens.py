@@ -1,7 +1,7 @@
 FORCE_TOKENS_FOR_LINGUA2: dict[str, list[str]] = {
     # If you added new dataset instruction, add it here
     "mbpp": ["Prompt:", "Assesments:"],
-    "multi_nli": ["Hypothesis:", "Premise:"],
+    "glue": ["Sentence1:", "Sentence2:"],
     "ai2_arc": ["Options:", "A.", "B.", "C.", "D."],
     "piqa": ["Options:", "A.", "B."],
 }
@@ -9,7 +9,6 @@ FORCE_TOKENS_FOR_LINGUA2: dict[str, list[str]] = {
 
 def get_force_token(dataset_name: str) -> list[str]:
     if dataset_name not in FORCE_TOKENS_FOR_LINGUA2:
-        # logger.warning(f"Unknown dataset: '{dataset_name}', using default prompt")
         print(f"Unknown dataset: '{dataset_name}', skiping..")
         return []
 
