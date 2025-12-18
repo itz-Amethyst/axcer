@@ -32,7 +32,6 @@ class DatasetProcessor:
                         formatted_options = ", ".join(f"{item}" for _, item in enumerate(value))
                         return f"Options: {formatted_options}"
                     else:
-                        print("matin use this")
                         return ", ".join(str(item) for item in value)
                 else:
                     return str(value) if value else ""
@@ -70,11 +69,11 @@ class DatasetProcessor:
                         continue
                     elif dataset_name == "glue":
                         if counter == 0:
-                            combined_parts.append(f"Text1: {str(field_value)}")
+                            combined_parts.append(f"Sentence1: {str(field_value)}")
                             counter += 1
                             continue
                         elif counter == 1:
-                            combined_parts.append(f"Text2: {str(field_value)}")
+                            combined_parts.append(f"Sentence2: {str(field_value)}")
                             continue
                     elif dataset_name == "piqa":
                         if i == 0:
@@ -111,13 +110,13 @@ class DatasetProcessor:
                 if len(value) > 0 and isinstance(value[0], str):
                     if dataset_name == "mbpp":
                         # to separate items by ; later while we are evaluating (, is a python keyword and used in the examples it's hard to separate by it)
-                        formatted_options = "; ".join(f"{item}" for _, item in enumerate(value))
+                        formatted_options = "||;; ".join(f"{item}" for _, item in enumerate(value))
                         return f"{formatted_options}"
                     else:
-                        formatted_options = ", ".join(f"{item}" for _, item in enumerate(value))
+                        formatted_options = "||;; ".join(f"{item}" for _, item in enumerate(value))
                         return f"{formatted_options}"
                 else:
-                    return ", ".join(str(item) for item in value)
+                    return "||;;".join(str(item) for item in value)
             else:
                 if dataset_name == "piqa":
                     return "A" if value == 0 else "B"
@@ -153,11 +152,6 @@ class DatasetProcessor:
             # for scitldr
             if answer_field:
                 df = df.with_columns(answer_series.alias("answer_field"))
-
-            # # Filter out rows where both question and answer are empty
-            # processed_df = processed_df.filter(
-            #     (pl.col("question") != "") | (pl.col("answer") != "")
-            # )
 
             logger.info(f"Processed dataset '{dataset_name}' - {len(df)} items after filtering")
             return df
