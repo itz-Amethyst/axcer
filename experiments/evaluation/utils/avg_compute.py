@@ -1,13 +1,15 @@
-from experiments.constants.paths import fill_path
 from pathlib import Path
+
 import polars as pl
 import polars.selectors as cs
 
+from experiments.constants.paths import fill_path
 from experiments.modals.utils.helper import map_path_to_volume
 
 
 # this is for each dataset for first table ! not concatenated category results
 # the base path should be in these list [original_path, axcer_path, selective_path, lingua2_path]
+# once you wanted to compute page 2 experiment without interrogative word applied set the write path to PROCESSED_AXCER_PATH_WITHOUT_INTERROGATIVE
 def compute_multiple_file_csv_column_averages(base_read_path: Path, base_write_path: Path, model_name: str) -> None:
     """
     Reads multiple CSV at input_csv_path, computes the average of each numeric column,
@@ -20,11 +22,11 @@ def compute_multiple_file_csv_column_averages(base_read_path: Path, base_write_p
         files_path = fill_path(base_read_path, model_name=model_name)
 
         for csv_file in files_path.glob("*.csv"):
-            df = pl.read_csv(csv_file)
+            print("Csv_file name", csv_file.stem)
+            df = pl.read_csv(csv_file, infer_schema_length=10570) if csv_file.stem == "squad" else pl.read_csv(csv_file)
 
             df_mean = df.mean()
 
-            # Round float columns to 3 decimal places
             df_mean = df_mean.with_columns((cs.by_dtype(pl.Float32) | cs.by_dtype(pl.Float64)).round(3))
             renamed_df = df_mean.rename({col: f"{col}_avg" for col in df_mean.columns})
 
@@ -51,8 +53,6 @@ def compute_single_file_csv_column_averages(input_csv_path: str, dataset_name: s
     df = pl.read_csv(input_csv_path)
 
     df_mean = df.mean()
-
-    # Round float columns to 3 decimal places
 
     df_mean = df_mean.with_columns((cs.by_dtype(pl.Float32) | cs.by_dtype(pl.Float64)).round(3))
     renamed_df = df_mean.rename({col: f"{col}_avg" for col in df_mean.columns})
