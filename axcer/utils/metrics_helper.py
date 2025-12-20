@@ -79,7 +79,7 @@ def track_runtime_and_memory(func):
             # Calculate memory allocated in bytes
             stats = end_snapshot.compare_to(start_snapshot, "lineno")
             total_alloc = sum(stat.size_diff for stat in stats)
-            self.total_memory_mb = float(f"{total_alloc / (1024 * 1024):.6f}")
+            self.total_memory_kb = float(f"{total_alloc / 1024:.3f}")
             memory_set_early = True
 
         # Attach hooks to instance
@@ -109,7 +109,7 @@ def track_runtime_and_memory(func):
             end_snapshot = tracemalloc.take_snapshot()
             stats = end_snapshot.compare_to(start_snapshot, "lineno")
             total_alloc = sum(stat.size_diff for stat in stats)
-            self.total_memory_mb = float(f"{total_alloc / (1024 * 1024):.6f}")
+            self.total_memory_kb = float(f"{total_alloc / 1024:.3f}")
 
         tracemalloc.stop()
 
