@@ -11,34 +11,41 @@ dynamic = [
 authors = [
     {name = "Milad-Khormaee", email = "pransermi@gmail.com"}
 ]
-license = {text = "MIT"}
+license = {text = "AGPL-3.0"}
 readme = "README.md"
 requires-python = ">=3.12"
 classifiers = [
 
-    "Development Status :: 4 - Beta",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Topic :: Text Processing",
-    # "Natural Language :: Persian",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python :: 3.12",
+    "Natural Language :: English",
 ]
-# fill this later
-keywords = ["nlp"]
+keywords = ["nlp", "compression", "prompt", "llm", "gpu-independent", "english", "resource-agnostic"]
 dependencies = [
     "joblib>=1.5.1",
+    "matplotlib>=3.10.3",
     "nltk>=3.9.1",
     "polars>=1.31.0",
     "rustworkx>=0.16.0",
     "tiktoken>=0.9.0",
 ]
 
+[project.optional-dependencies]
+vis = [
+    "PyQt5>=5.15",
+]
+
 [tool.hatch.version]
 path = "axcer/_version.py"
 
 [project.urls]
-Homepage = "https://example.com"
-Changelog = "https://github.com/"
-Contribution = "https://github.com/"
-Issues = "https://github.com/"
+Homepage = "https://github.com/itz-Amethyst/axcer"
+# Changelog = "https://github.com/"
+Contribution = "https://github.com/itz-Amethyst/axcer"
+Issues = "https://github.com/itz-Amethyst/axcer/issues"
 
 [tool.hatch.build]
 exclude = ["tests*"]
@@ -90,8 +97,6 @@ line-length = 127
 # Define the number of spaces used for indentation, aligning with Black's style.
 indent-width = 4
 
-# The minimum Python version to target, e.g., when considering automatic code upgrades,
-# like rewriting type annotations
 # TODO: ????
 # target-version = "py39"
 
