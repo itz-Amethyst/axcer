@@ -2,8 +2,8 @@
 
 <p align="center">
   <img
-    src="https://i.ibb.co/nM8cZY4w/nano-banana-free-w-K3i-X60c9-Sqzg-Ml0-Z7-OIlg9q-Gs-PZ0mpak-Y4-removebg-preview-1.png"
-    alt="Nano Banana Logo"
+    src="./static/nano-banana-free-wK3iX60c9SqzgMl0Z7OIlg9qGsPZ0mpakY4-removebg-preview.png"
+    alt="Axcer Logo"
     width="250"
     height="240"
   />
