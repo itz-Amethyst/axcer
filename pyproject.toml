@@ -43,9 +43,12 @@ path = "axcer/_version.py"
 
 [project.urls]
 Homepage = "https://github.com/itz-Amethyst/axcer"
-# Changelog = "https://github.com/"
-Contribution = "https://github.com/itz-Amethyst/axcer"
+Repository = "https://github.com/Itz-Amethyst/axcer"
+Documentation = "https://github.com/Itz-Amethyst/axcer#readme"
 Issues = "https://github.com/itz-Amethyst/axcer/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["axcer"]
 
 [tool.hatch.build]
 exclude = ["tests*"]
@@ -177,7 +180,7 @@ convention = "google"
 "mkdocs_macros.py" = ["ALL"] # always
 
 [tool.semantic_release]
-version_variable = "axcer/__init__.py" # Path to the version variable in your code
+version_variable = "axcer/_version.py:__version__"
 version = "0.0.1"                      # Starting version
 disable_commit_message_check = false   # Ensure that commit messages follow semantic versioning
 changelog_file = "CHANGELOG.md"        # Path to the changelog file

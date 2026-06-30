@@ -20,11 +20,13 @@ parser = argparse.ArgumentParser(description="Axcer compression")
 parser.add_argument(
     "--dataset-path",
     help="Dataset directory that axcer would do the compression on it",
+    type=Path,
     required=True,
 )
 parser.add_argument(
     "--save-path",
     help="path to save results",
+    type=Path,
     required=True,
     # default="/home/itz-amethyst/dev/axcer/experiments/results/axcer/processed/testing2/{dataset_name}.csv",
 )
@@ -35,7 +37,7 @@ os.makedirs(os.path.dirname(args.save_path), exist_ok=True)
 
 def compress_and_replace():
     for pq_file in Path(args.dataset_path).glob("*.parquet"):
-        write_path = args.save_path / "{dataset_name}.csv"
+        write_path = Path(args.save_path) / "{dataset_name}.csv"
         # write_path = fill_path(args.save_path, dataset_name=pq_file.stem.removeprefix("processed_"))
         write_path = fill_path(write_path, dataset_name=pq_file.stem.removeprefix("processed_"))
         write_path.parent.mkdir(parents=True, exist_ok=True)
