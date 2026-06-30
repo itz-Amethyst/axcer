@@ -10,9 +10,11 @@
 </p>
 
 
+
 <!-- ![Build Status](https://img.shields.io/github/actions/workflow/status/itz-Amethyst/axcer/python-app.yml?branch=main)   -->
 <!-- ![PyPI Version](https://img.shields.io/pypi/v/axcer)   -->
 ![License](https://img.shields.io/badge/license-AGPL--3.0-red)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Experiment%20Results-yellow?logo=huggingface)](https://huggingface.co/collections/Itz-Amethyst/axcer-evaluation-results)
 
 **Axcer** (<u>A</u>lgorithmic compression with le<u>X</u>ical and interrogative <u>E</u>xt<u>R</u>action) is a *training‑free, GPU‑independent prompt compression framework* designed for modern NLP workflows with large language models (LLMs). It extracts lexical units and interrogative cues to compress prompts efficiently, enabling faster and more accurate downstream inference without the overhead of training data or heavy models.
 
@@ -42,44 +44,38 @@ This software project accompanies the research paper published in WILL BE UPDATE
 axcer/                   # Main source code for the Axcer framework
 experiments/             # All experimental artifacts
 ├─ modals/               # Inference experiments on specific model code
-├─ results/              # Results organized by baseline and LLM
 ├─ evaluation/           # Scripts for evaluation metrics
 │   └─ visualization/    # Plotting/visualization scripts and figures
-datasets/                # 9 benchmark datasets used for experiments
-│   ├─ SQuAD
-│   ├─ BoolQ
-│   ├─ PIQA
-│   ├─ AI2_ARC
-│   ├─ MRPC
-│   ├─ GSM8K
-│   ├─ MAWPS
-│   ├─ SciTLDR
-│   └─ MBPP
 figures/                  # Figures used in the manuscript
 
 ````
 
 ---
 
-## 📦 Installation
+## 🧪 Experiments
 
-Axcer uses a modern Python packaging layout (`pyproject.toml`). To install:
+All experiments are located in `experiments/`:
+
+* **modals/**: Inference experiments on LLMs
+* **evaluation/**: Evaluation metrics and analysis scripts
+* **evaluation/visualization/**: Plotting scripts and figures using Matplotlib/Seaborn
+
+Datasets used in experiments are specified in [this section](#-datasets).
+
+All of our experimental results are uploaded in [huggingface](https://huggingface.co/collections/Itz-Amethyst/axcer-evaluation-results).
+
+---
+
+## 📦 Installation
+Axcer uses a modern Python packaging layout (`pyproject.toml`).
+
+### 🚀 Install directly from GitHub (recommended)
+
+This is the easiest way to use Axcer:
 
 ```bash
-# pip way
-pip install axcer
-
-# uv way
-uv pip install axcer
-````
-
-> In order to construct weighted directed graph (WDG), first install optional visualization dependencies (e.g., PyQt5):
->
-> ```bash
-> pip install axcer[vis]
-> ```
-
-
+pip install git+https://github.com/Itz-Amethyst/axcer.git
+```
 ---
 
 ## 🚀 Usage Example: Compressing Prompts
@@ -133,19 +129,6 @@ if self.enable_metrics_logging:
     self._set_runtime_now()
     self._set_memory_now()
 ```
-
----
-
-## 🧪 Experiments
-
-All experiments are located in `experiments/`:
-
-* **modals/**: Inference experiments on LLMs
-* **results/**: Structured results by baseline and LLM
-* **evaluation/**: Evaluation metrics and analysis scripts
-* **visualization/**: Plotting scripts and figures using Matplotlib/Seaborn
-
-Datasets used in experiments are under `datasets/`.
 
 ---
 
